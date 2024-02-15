@@ -1,38 +1,70 @@
 use crate::MapEvent;
 
+use crate::ENVIRONMENT;
 use crate::EVENT;
 use crate::PLOTUPDATE;
 
 use crate::ROBOT_COL;
 use crate::ROBOT_ROW;
 
+use ohcrab_weather::weather_tool::WeatherPredictionTool;
 use rand::Rng;
 use robotics_lib::energy::Energy;
 use robotics_lib::event::events::Event;
-use robotics_lib::interface::{destroy, go, one_direction_view, Direction};
+use robotics_lib::interface::{destroy, go, look_at_sky, one_direction_view, Direction};
 use robotics_lib::interface::{robot_map, where_am_i};
 use robotics_lib::runner::backpack::BackPack;
 use robotics_lib::runner::{Robot, Runnable};
 use robotics_lib::world::coordinates::Coordinate;
 use robotics_lib::world::environmental_conditions::EnvironmentalConditions;
 use robotics_lib::world::environmental_conditions::WeatherType::{Rainy, Sunny};
-use robotics_lib::world::tile::Content::{
-    Bank, Bin, Coin, Crate, Fire, Fish, Garbage, Market, Rock, Tree,
-};
+use robotics_lib::world::tile::Content::Coin;
 use robotics_lib::world::tile::TileType;
 use robotics_lib::world::tile::TileType::*;
 
+use oxagaudiotool::OxAgAudioTool;
 use robotics_lib::world::tile::{Content, Tile};
 use robotics_lib::world::world_generator::Generator;
 use robotics_lib::world::World;
 use std::collections::HashMap;
 use strum::IntoEnumIterator;
-pub(crate) struct MyRobot(pub Robot);
+pub(crate) struct MyRobot {
+    pub robot: Robot,
+    //audio: OxAgAudioTool,
+}
 impl Runnable for MyRobot {
     fn process_tick(&mut self, world: &mut World) {
+        let mut down = false;
+        match go(self, world, Direction::Up) {
+            Ok(_) => {}
+            Err(_) => {
+                down = true;
+            }
+        }
+        if down {
+            go(self, world, Direction::Down);
+        }
+        let mut right = false;
+        match go(self, world, Direction::Left) {
+            Ok(_) => {}
+            Err(_) => {
+                right = true;
+            }
+        }
+        if right {
+            go(self, world, Direction::Right);
+        }
+
         let (_robot_view, robot_position) = where_am_i(self, world);
+        //todo! rename
+
+        {
+            let mut env = ENVIRONMENT.lock().unwrap();
+            *env = Some(look_at_sky(&world));
+        }
 
         let v = robot_map(world);
+
         let mut plot_update = PLOTUPDATE.lock().unwrap();
         let mut events = EVENT.lock().unwrap();
         let mut robot_col = ROBOT_COL.lock().unwrap();
@@ -44,6 +76,9 @@ impl Runnable for MyRobot {
             *robot_row = robot_position.1;
         }
         let mut update_map = false;
+        // let mut future_weater_tool = WeatherPredictionTool::new();
+        // future_weater_tool.process_event();
+        // let future_weather = predict(, 2);
         match v {
             None => {}
             Some(v) => {
@@ -75,39 +110,37 @@ impl Runnable for MyRobot {
         if update_map {
             events.push(MapEvent::UpdateMap);
         }
-        let _ = go(self, world, Direction::Down);
-        let _ = one_direction_view(self, world, Direction::Right, 4);
-        let _ = destroy(self, world, Direction::Right);
     }
 
     fn handle_event(&mut self, event: Event) {
+        //let _ = self.audio.play_audio_based_on_event(&event);
         println!();
         println!("{:?}", event);
         println!();
     }
 
     fn get_energy(&self) -> &Energy {
-        &self.0.energy
+        &self.robot.energy
     }
 
     fn get_energy_mut(&mut self) -> &mut Energy {
-        &mut self.0.energy
+        &mut self.robot.energy
     }
 
     fn get_coordinate(&self) -> &Coordinate {
-        &self.0.coordinate
+        &self.robot.coordinate
     }
 
     fn get_coordinate_mut(&mut self) -> &mut Coordinate {
-        &mut self.0.coordinate
+        &mut self.robot.coordinate
     }
 
     fn get_backpack(&self) -> &BackPack {
-        &self.0.backpack
+        &self.robot.backpack
     }
 
     fn get_backpack_mut(&mut self) -> &mut BackPack {
-        &mut self.0.backpack
+        &mut self.robot.backpack
     }
 }
 
@@ -140,24 +173,24 @@ impl Generator for WorldGenerator {
                 let i_tiletype = rng.gen_range(0..TileType::iter().len());
                 let _i_content = rng.gen_range(0..Content::iter().len());
                 match i_tiletype {
-                    3 => {
+                    300 => {
                         row.push(Tile {
                             tile_type: Grass,
                             content: Coin(1),
                             elevation: 0,
                         });
                     }
-                    4 => {
+                    5 => {
                         row.push(Tile {
-                            tile_type: ShallowWater,
-                            content: Content::None,
+                            tile_type: Sand,
+                            content: Coin(1),
                             elevation: 0,
                         });
                     }
                     _ => {
                         row.push(Tile {
-                            tile_type: Sand,
-                            content: Coin(1),
+                            tile_type: ShallowWater,
+                            content: Content::None,
                             elevation: 0,
                         });
                     }
@@ -170,6 +203,6 @@ impl Generator for WorldGenerator {
 
         let max_score = rand::random::<f32>();
 
-        (map, (17, 1), environmental_conditions, max_score, None)
+        (map, (50, 50), environmental_conditions, max_score, None)
     }
 }

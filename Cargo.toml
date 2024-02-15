@@ -16,4 +16,9 @@ rand = "0.8.5"
 strum = "0.25.0"
 strum_macros = { version = "0.25.3", features = [] }
 robotics_lib = { version = "0.1.21", registry = "kellnr"}
+ohcrab_weather = { version = "0.1.2", registry = "kellnr"}
+oxagaudiotool = { version = "0.2.0", registry = "kellnr"}
 lazy_static = "1.4.0"
+bevy-progressbar = "0.6.1"
+bevy_utils = "0.12.1"
+rusty_pripyat = { version = "0.1.0", registry = "kellnr"}
