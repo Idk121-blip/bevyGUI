@@ -28,7 +28,7 @@ pub(in crate::gui) fn content_positioner(
             (map_dimension - j) as f32 * TILE_DIMENSION,
             CONTENT_Z,
         )
-        .with_scale(Vec3::new(0.5, 0.5, 0.0));
+        .with_scale(Vec3::new(0.7, 0.7, 0.0));
         map_entity_content_id = Some(
             commands
                 .spawn(SpriteSheetBundle {
@@ -140,19 +140,19 @@ pub(crate) fn get_asset_of_content(
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     return match content {
-        Rock(_) => Some((texture_atlas_handle, 0)),
-        Tree(_) => Some((texture_atlas_handle, 0)),
+        Rock(_) => Some((texture_atlas_handle, 4)),
+        Tree(_) => Some((texture_atlas_handle, 5)),
         Garbage(_) => Some((texture_atlas_handle, 2)),
         Fire => Some((texture_atlas_handle, 0)),
         Coin(_) => Some((texture_atlas_handle, 3)),
         Bin(_) => Some((texture_atlas_handle, 1)),
-        Crate(_) => Some((texture_atlas_handle, 0)),
-        Bank(_) => Some((texture_atlas_handle, 0)),
-        Content::Water(_) => Some((texture_atlas_handle, 0)),
-        Market(_) => Some((texture_atlas_handle, 0)),
-        Fish(_) => Some((texture_atlas_handle, 0)),
-        Content::Building => Some((texture_atlas_handle, 0)),
-        Content::Bush(_) => Some((texture_atlas_handle, 0)),
+        Crate(_) => Some((texture_atlas_handle, 8)),
+        Bank(_) => Some((texture_atlas_handle, 6)),
+        Content::Water(_) => Some((texture_atlas_handle, 7)),
+        Market(_) => Some((texture_atlas_handle, 9)),
+        Fish(_) => Some((texture_atlas_handle, 11)),
+        Content::Building => Some((texture_atlas_handle, 10)),
+        Content::Bush(_) => Some((texture_atlas_handle, 12)),
         Content::JollyBlock(_) => None,
         Content::Scarecrow => None,
         Content::None => None,

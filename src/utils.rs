@@ -1,4 +1,4 @@
-use crate::{PLOT, PLOTUPDATE};
+use crate::components::{PLOT, PLOTUPDATE};
 
 pub fn make_map(map_dim: usize) {
     let mut map = PLOT.lock().unwrap();

@@ -1,13 +1,14 @@
+use crate::components::RobotResource;
+use crate::components::ENVIRONMENT;
+use crate::components::SCORE;
 use crate::gui::hud::components::*;
 use crate::gui::hud::styles::*;
 use crate::gui::hud::systems::utils::{get_clock_asset, get_weather_asset};
 use crate::gui::utils::get_asset_of_content;
-use crate::{RobotResource, ENVIRONMENT};
 use bevy::prelude::*;
 use bevy_progressbar::{ProgressBar, ProgressBarBundle, ProgressBarMaterial};
 use robotics_lib::world::environmental_conditions::WeatherType;
 use robotics_lib::world::tile::Content;
-
 pub(crate) fn spawn_hud(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -368,7 +369,17 @@ pub(crate) fn build_hud(
                                 get_weather_asset(&weather, &asset_server, &mut texture_atlases);
                             parent.spawn((
                                 AtlasImageBundle {
-                                    style: image_style(),
+                                    style: Style {
+                                        margin: UiRect::new(
+                                            Val::Px(8.0),
+                                            Val::Px(8.0),
+                                            Val::Px(10.0),
+                                            Val::Px(10.0),
+                                        ),
+                                        width: Val::Px(30.),
+                                        height: Val::Px(30.),
+                                        ..default()
+                                    },
                                     texture_atlas,
                                     texture_atlas_image: UiTextureAtlasImage { index, ..default() },
                                     ..default()
@@ -496,7 +507,8 @@ pub(crate) fn build_hud(
 
                             let mut bar2 = ProgressBar::new(vec![(1, Color::GREEN)]);
                             //todo! rename
-                            bar2.set_progress(0.);
+                            let score = SCORE.lock().unwrap();
+                            bar2.set_progress(*score / 100.);
                             let style = Style {
                                 position_type: PositionType::Absolute,
                                 width: Val::Px(100.),

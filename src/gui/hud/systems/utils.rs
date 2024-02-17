@@ -1,5 +1,5 @@
+use crate::components::{CLOCK_ASSET_FILE, WEATHER_ASSET_FILE};
 use crate::gui::components::TILE_DIMENSION;
-use crate::{CLOCK_ASSET_FILE, WEATHER_ASSET_FILE};
 use bevy::prelude::*;
 use robotics_lib::world::environmental_conditions::WeatherType;
 
@@ -9,7 +9,7 @@ pub(crate) fn get_weather_asset(
     texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
 ) -> (Handle<TextureAtlas>, usize) {
     const COLUMNS: usize = 3;
-    const ROWS: usize = 4;
+    const ROWS: usize = 2;
     let texture_handle = asset_server.load(WEATHER_ASSET_FILE);
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
@@ -26,10 +26,10 @@ pub(crate) fn get_weather_asset(
 pub(crate) fn get_weather_asset_number(weather: &WeatherType) -> usize {
     match weather {
         WeatherType::Sunny => 0,
-        WeatherType::Rainy => 0,
-        WeatherType::Foggy => 0,
-        WeatherType::TropicalMonsoon => 0,
-        WeatherType::TrentinoSnow => 0,
+        WeatherType::Rainy => 1,
+        WeatherType::Foggy => 2,
+        WeatherType::TrentinoSnow => 3,
+        WeatherType::TropicalMonsoon => 4,
     }
 }
 
@@ -54,7 +54,7 @@ pub(crate) fn get_clock_asset(
 }
 
 pub(crate) fn get_time_asset_number(time: &str) -> usize {
-    let mut time_string = time.clone().to_string();
+    let mut time_string = time.to_string();
     let hour = time_string.split(":").collect::<Vec<&str>>()[0]
         .parse::<usize>()
         .unwrap();

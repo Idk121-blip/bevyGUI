@@ -1,15 +1,11 @@
+pub(in crate::gui) use crate::components::TickUpdate;
+use crate::components::{
+    ContentToDespawn, MapEvent, MapToDespawn, RobotResource, RobotUI, EVENT, MAP_DIMENSION, PLOT,
+    PLOTUPDATE, ROBOT_COL, ROBOT_ROW,
+};
 use crate::gui::components::TILE_DIMENSION;
 use crate::gui::utils::*;
-use crate::RobotUI;
-pub(in crate::gui) use crate::TickUpdate;
-use crate::EVENT;
-use crate::MAP_DIMENSION;
-use crate::PLOT;
-use crate::PLOTUPDATE;
-use crate::ROBOT_COL;
-use crate::ROBOT_ROW;
-use crate::{ContentToDespawn, MapToDespawn};
-use crate::{MapEvent, RobotResource};
+
 pub use bevy::prelude::*;
 use robotics_lib::world::tile::Content;
 pub(crate) fn update_map(
@@ -137,7 +133,7 @@ fn tile_checker(
     }
 }
 
-fn robot_movement(
+pub(crate) fn robot_movement(
     characters: &mut Query<(&mut Transform, &mut RobotUI)>,
     map_dimension: usize,
     mut query: &mut Query<&mut Transform, (With<Camera>, Without<RobotUI>)>,

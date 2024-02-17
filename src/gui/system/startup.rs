@@ -1,10 +1,9 @@
+use crate::components::{
+    ContentToDespawn, MapToDespawn, RobotResource, RobotUI, TextUpdate, TickUpdate, EVENT,
+    MAP_DIMENSION, PLOT, PLOTUPDATE, PROCESS_TICK_TIME, ROBOT_COL, ROBOT_ROW,
+};
 use crate::gui::components::{ROBOT_ASSET_FILE, ROBOT_DIMENSION, TILE_DIMENSION};
 use crate::gui::utils::{content_positioner, map_tile_positioner};
-use crate::{
-    ContentToDespawn, MapTickUpdate, MapToDespawn, RobotResource, RobotUI, TextUpdate, TickUpdate,
-    EVENT, MAP_DIMENSION, MAP_UPDATE_TICK_TIME, PLOT, PLOTUPDATE, PROCESS_TICK_TIME, ROBOT_COL,
-    ROBOT_ROW,
-};
 pub use bevy::core_pipeline::clear_color::ClearColorConfig;
 pub use bevy::prelude::*;
 
@@ -89,10 +88,6 @@ pub(crate) fn setup(
         PROCESS_TICK_TIME,
         TimerMode::Repeating,
     )));
-    commands.spawn(MapTickUpdate(Timer::from_seconds(
-        PROCESS_TICK_TIME - MAP_UPDATE_TICK_TIME,
-        TimerMode::Repeating,
-    )));
     commands.spawn(TextUpdate(Timer::from_seconds(
         PROCESS_TICK_TIME,
         TimerMode::Repeating,
@@ -107,20 +102,31 @@ fn robot_spawn(
     map_dimension: usize,
 ) {
     let texture = asset_server.load(ROBOT_ASSET_FILE);
+    let x_trans = robot_row as f32 * TILE_DIMENSION;
+    let y_trans = (map_dimension - robot_col) as f32 * TILE_DIMENSION;
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(ROBOT_DIMENSION, ROBOT_DIMENSION)),
                 ..default()
             },
-            transform: Transform::from_xyz(
-                robot_row as f32 * TILE_DIMENSION,
-                (map_dimension - robot_col) as f32 * TILE_DIMENSION,
-                0.0,
-            ),
+            transform: Transform::from_xyz(x_trans, y_trans, 0.0),
             texture,
             ..default()
         },
         RobotUI {},
     ));
+}
+pub(crate) fn camera_positioner(
+    mut query: Query<&mut Transform, (With<Camera>, Without<RobotUI>)>,
+) {
+    let robot_col = ROBOT_COL.lock().unwrap();
+    let robot_row = ROBOT_ROW.lock().unwrap();
+    let map_dimension = MAP_DIMENSION.lock().unwrap();
+    let x_trans = *robot_row as f32 * TILE_DIMENSION;
+    let y_trans = (*map_dimension - *robot_col) as f32 * TILE_DIMENSION;
+    for mut projection in query.iter_mut() {
+        projection.translation.y = y_trans;
+        projection.translation.x = x_trans;
+    }
 }

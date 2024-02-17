@@ -1,16 +1,20 @@
+use crate::components::{RobotResource, TextUpdate, ENVIRONMENT, FUTUREENVIRONMENT, SCORE};
 use crate::gui::hud::components::*;
 use crate::gui::hud::systems::utils::{get_time_asset_number, get_weather_asset_number};
-use crate::{RobotResource, TextUpdate, ENVIRONMENT};
 use bevy::prelude::*;
 use bevy_progressbar::ProgressBar;
 use robotics_lib::world::tile::Content;
-//todo! fix using backpack as resource
 
 pub(crate) fn text_updater(
     mut clock_time: Query<
         &mut Text,
         (
             With<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
@@ -23,8 +27,11 @@ pub(crate) fn text_updater(
         &mut UiTextureAtlasImage,
         (
             With<ClockIcon>,
-            Without<WeatherIcon>,
             Without<ClockTime>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
@@ -33,12 +40,33 @@ pub(crate) fn text_updater(
             Without<FishText>,
         ),
     )>,
-    mut energy_text: Query<
+    mut energy_bar: Query<
         &mut ProgressBar,
         (
             With<EnergyBar>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
+            Without<RockText>,
+            Without<TreeText>,
+            Without<WaterText>,
+            Without<GarbageText>,
+            Without<FishText>,
+        ),
+    >,
+    mut score_bar: Query<
+        &mut ProgressBar,
+        (
+            With<ScoreBar>,
+            Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
             Without<WaterText>,
@@ -51,6 +79,27 @@ pub(crate) fn text_updater(
         (
             With<WeatherIcon>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
+            Without<RockText>,
+            Without<TreeText>,
+            Without<WaterText>,
+            Without<GarbageText>,
+            Without<FishText>,
+        ),
+    )>,
+    mut future_weather_icon: Query<(
+        &mut UiTextureAtlasImage,
+        (
+            With<FutureWeatherIcon>,
+            Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
@@ -64,6 +113,11 @@ pub(crate) fn text_updater(
         (
             With<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<RockText>,
             Without<TreeText>,
             Without<WaterText>,
@@ -75,9 +129,14 @@ pub(crate) fn text_updater(
         &mut Text,
         (
             With<RockText>,
+            Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<TreeText>,
-            Without<ClockTime>,
             Without<WaterText>,
             Without<GarbageText>,
             Without<FishText>,
@@ -87,8 +146,13 @@ pub(crate) fn text_updater(
         &mut Text,
         (
             With<TreeText>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<WaterText>,
             Without<GarbageText>,
@@ -99,8 +163,13 @@ pub(crate) fn text_updater(
         &mut Text,
         (
             With<WaterText>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
             Without<GarbageText>,
@@ -112,10 +181,15 @@ pub(crate) fn text_updater(
         (
             With<GarbageText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
-            Without<WaterText>,
             Without<TreeText>,
+            Without<WaterText>,
             Without<FishText>,
         ),
     >,
@@ -124,11 +198,16 @@ pub(crate) fn text_updater(
         (
             With<FishText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
+            Without<TreeText>,
             Without<WaterText>,
             Without<GarbageText>,
-            Without<TreeText>,
         ),
     >,
     runner: NonSend<RobotResource>,
@@ -145,8 +224,14 @@ pub(crate) fn text_updater(
             &mut fish_text,
             &runner,
         );
-        update_energy(&mut energy_text, &runner);
-        update_weather(&mut clock_time, &mut weather_icon, &mut clock_icon);
+        update_energy(&mut energy_bar, &runner);
+        update_score(&mut score_bar);
+        update_weather(
+            &mut clock_time,
+            &mut weather_icon,
+            &mut clock_icon,
+            &mut future_weather_icon,
+        );
     }
 }
 
@@ -155,6 +240,11 @@ fn update_weather(
         &mut Text,
         (
             With<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
@@ -168,6 +258,10 @@ fn update_weather(
         (
             With<WeatherIcon>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
@@ -180,8 +274,28 @@ fn update_weather(
         &mut UiTextureAtlasImage,
         (
             With<ClockIcon>,
-            Without<WeatherIcon>,
             Without<ClockTime>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
+            Without<RockText>,
+            Without<TreeText>,
+            Without<WaterText>,
+            Without<GarbageText>,
+            Without<FishText>,
+        ),
+    )>,
+    mut future_weather_icon: &mut Query<(
+        &mut UiTextureAtlasImage,
+        (
+            With<FutureWeatherIcon>,
+            Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
@@ -193,17 +307,23 @@ fn update_weather(
 ) {
     let time;
     let weather;
+    let future_weather;
     {
         let env = ENVIRONMENT.lock().unwrap();
         time = env.as_ref().unwrap().get_time_of_day_string();
 
         weather = env.as_ref().unwrap().get_weather_condition();
+        match (*FUTUREENVIRONMENT.lock().unwrap()).as_mut() {
+            Some(x) => future_weather = x.clone(),
+            None => future_weather = weather.clone(),
+        }
     }
 
-    if time.eq("00:00") {
-        for mut icon in weather_icon.iter_mut() {
-            icon.0.index = get_weather_asset_number(&weather);
-        }
+    for mut icon in weather_icon.iter_mut() {
+        icon.0.index = get_weather_asset_number(&weather);
+    }
+    for mut icon in future_weather_icon.iter_mut() {
+        icon.0.index = get_weather_asset_number(&future_weather);
     }
     for mut text in clock_time.iter_mut() {
         text.sections[0].value = time.clone();
@@ -213,13 +333,43 @@ fn update_weather(
     }
 }
 
+fn update_score(
+    mut score_bar: &mut Query<
+        &mut ProgressBar,
+        (
+            With<ScoreBar>,
+            Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
+            Without<RockText>,
+            Without<TreeText>,
+            Without<WaterText>,
+            Without<GarbageText>,
+            Without<FishText>,
+        ),
+    >,
+) {
+    let score = SCORE.lock().unwrap();
+
+    for mut x in score_bar.iter_mut() {
+        x.set_progress(*score / 100.);
+    }
+}
+
 fn update_energy(
-    mut energy_text: &mut Query<
+    mut energy_bar: &mut Query<
         &mut ProgressBar,
         (
             With<EnergyBar>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
             Without<WaterText>,
@@ -230,7 +380,7 @@ fn update_energy(
     runner: &NonSend<RobotResource>,
 ) {
     let energy_level = runner.runner.get_robot().get_energy().get_energy_level();
-    for mut x in energy_text.iter_mut() {
+    for mut x in energy_bar.iter_mut() {
         x.set_progress(energy_level as f32 / 1000.0);
     }
 }
@@ -241,6 +391,11 @@ fn update_backpack(
         (
             With<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<RockText>,
             Without<TreeText>,
             Without<WaterText>,
@@ -252,9 +407,14 @@ fn update_backpack(
         &mut Text,
         (
             With<RockText>,
+            Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<TreeText>,
-            Without<ClockTime>,
             Without<WaterText>,
             Without<GarbageText>,
             Without<FishText>,
@@ -264,8 +424,13 @@ fn update_backpack(
         &mut Text,
         (
             With<TreeText>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<WaterText>,
             Without<GarbageText>,
@@ -276,8 +441,13 @@ fn update_backpack(
         &mut Text,
         (
             With<WaterText>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
             Without<GarbageText>,
@@ -289,10 +459,15 @@ fn update_backpack(
         (
             With<GarbageText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
-            Without<WaterText>,
             Without<TreeText>,
+            Without<WaterText>,
             Without<FishText>,
         ),
     >,
@@ -301,11 +476,16 @@ fn update_backpack(
         (
             With<FishText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
+            Without<TreeText>,
             Without<WaterText>,
             Without<GarbageText>,
-            Without<TreeText>,
         ),
     >,
     runner: &NonSend<RobotResource>,
@@ -349,6 +529,11 @@ fn update_coin_text(
         (
             With<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<RockText>,
             Without<TreeText>,
             Without<WaterText>,
@@ -370,9 +555,14 @@ pub(crate) fn update_rock_text(
         &mut Text,
         (
             With<RockText>,
+            Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<TreeText>,
-            Without<ClockTime>,
             Without<WaterText>,
             Without<GarbageText>,
             Without<FishText>,
@@ -391,8 +581,13 @@ pub(crate) fn update_water_text(
         &mut Text,
         (
             With<WaterText>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<TreeText>,
             Without<GarbageText>,
@@ -413,10 +608,15 @@ pub(crate) fn update_garbage_text(
         (
             With<GarbageText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
-            Without<WaterText>,
             Without<TreeText>,
+            Without<WaterText>,
             Without<FishText>,
         ),
     >,
@@ -433,11 +633,16 @@ pub(crate) fn update_fish_text(
         (
             With<FishText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
             Without<CoinText>,
             Without<RockText>,
+            Without<TreeText>,
             Without<WaterText>,
             Without<GarbageText>,
-            Without<TreeText>,
         ),
     >,
     number: usize,
@@ -453,8 +658,13 @@ pub(crate) fn update_tree_text(
         &mut Text,
         (
             With<TreeText>,
-            Without<CoinText>,
             Without<ClockTime>,
+            Without<ClockIcon>,
+            Without<EnergyBar>,
+            Without<ScoreBar>,
+            Without<WeatherIcon>,
+            Without<FutureWeatherIcon>,
+            Without<CoinText>,
             Without<RockText>,
             Without<WaterText>,
             Without<GarbageText>,
