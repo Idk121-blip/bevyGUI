@@ -54,7 +54,7 @@ pub(crate) fn get_clock_asset(
 }
 
 pub(crate) fn get_time_asset_number(time: &str) -> usize {
-    let mut time_string = time.to_string();
+    let time_string = time.to_string();
     let hour = time_string.split(":").collect::<Vec<&str>>()[0]
         .parse::<usize>()
         .unwrap();

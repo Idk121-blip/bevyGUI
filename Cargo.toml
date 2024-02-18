@@ -21,6 +21,6 @@ oxagaudiotool = { version = "0.2.0", registry = "kellnr"}
 lazy_static = "1.4.0"
 bevy-progressbar = "0.6.1"
 bevy_utils = "0.12.1"
-exclusion_zone_world_generator = { version = "0.1.0", registry = "kellnr" }
+exclusion_zone_world_generator = { version = "0.1.4", registry = "kellnr" }
 oxagworldgenerator = { version = "0.1.4", registry = "kellnr" }
 recycle_by_ifrustrati = { version = "0.1.2", registry = "kellnr" }

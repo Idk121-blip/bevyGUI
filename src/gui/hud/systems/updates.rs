@@ -287,7 +287,7 @@ fn update_weather(
             Without<FishText>,
         ),
     )>,
-    mut future_weather_icon: &mut Query<(
+    future_weather_icon: &mut Query<(
         &mut UiTextureAtlasImage,
         (
             With<FutureWeatherIcon>,
@@ -334,7 +334,7 @@ fn update_weather(
 }
 
 fn update_score(
-    mut score_bar: &mut Query<
+    score_bar: &mut Query<
         &mut ProgressBar,
         (
             With<ScoreBar>,
@@ -360,7 +360,7 @@ fn update_score(
 }
 
 fn update_energy(
-    mut energy_bar: &mut Query<
+    energy_bar: &mut Query<
         &mut ProgressBar,
         (
             With<EnergyBar>,

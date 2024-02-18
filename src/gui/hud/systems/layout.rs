@@ -7,7 +7,6 @@ use crate::gui::hud::systems::utils::{get_clock_asset, get_weather_asset};
 use crate::gui::utils::get_asset_of_content;
 use bevy::prelude::*;
 use bevy_progressbar::{ProgressBar, ProgressBarBundle, ProgressBarMaterial};
-use robotics_lib::world::environmental_conditions::WeatherType;
 use robotics_lib::world::tile::Content;
 pub(crate) fn spawn_hud(
     mut commands: Commands,
@@ -365,7 +364,7 @@ pub(crate) fn build_hud(
                             ..default()
                         })
                         .with_children(|parent| {
-                            let ((texture_atlas, index)) =
+                            let (texture_atlas, index) =
                                 get_weather_asset(&weather, &asset_server, &mut texture_atlases);
                             parent.spawn((
                                 AtlasImageBundle {
@@ -405,7 +404,7 @@ pub(crate) fn build_hud(
                                 ..default()
                             });
                             //todo! future weather
-                            let ((texture_atlas, index)) =
+                            let (texture_atlas, index) =
                                 get_weather_asset(&weather, &asset_server, &mut texture_atlases);
                             parent.spawn((
                                 AtlasImageBundle {

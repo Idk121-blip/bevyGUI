@@ -1,5 +1,5 @@
 use crate::components::{PLOT, PLOTUPDATE};
-
+pub(crate) mod utils_for_ai;
 pub fn make_map(map_dim: usize) {
     let mut map = PLOT.lock().unwrap();
     let mut update_map = PLOTUPDATE.lock().unwrap();

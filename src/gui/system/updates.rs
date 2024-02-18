@@ -136,7 +136,7 @@ fn tile_checker(
 pub(crate) fn robot_movement(
     characters: &mut Query<(&mut Transform, &mut RobotUI)>,
     map_dimension: usize,
-    mut query: &mut Query<&mut Transform, (With<Camera>, Without<RobotUI>)>,
+    query: &mut Query<&mut Transform, (With<Camera>, Without<RobotUI>)>,
 ) {
     let robot_col = ROBOT_COL.lock().unwrap();
     let robot_row = ROBOT_ROW.lock().unwrap();

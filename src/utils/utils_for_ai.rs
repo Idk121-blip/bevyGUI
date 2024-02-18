@@ -66,7 +66,7 @@ pub fn ui_variable_update(robot: &mut impl Runnable, world: &mut World) {
 }
 
 pub fn robot_audio() -> OxAgAudioTool {
-    let mut events = HashMap::new();
+    let events = HashMap::new();
     // events.insert(
     //     Event::Ready,
     //     OxAgSoundConfig::new("assets/default/event/event_ready.ogg"),

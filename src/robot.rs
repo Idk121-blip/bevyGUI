@@ -1,13 +1,12 @@
-use crate::utils_for_ai::ui_variable_update;
+use crate::utils::utils_for_ai::ui_variable_update;
 use ohcrab_weather::weather_tool::WeatherPredictionTool;
 use oxagaudiotool::OxAgAudioTool;
 use robotics_lib::energy::Energy;
 use robotics_lib::event::events::Event;
-use robotics_lib::interface::{destroy, go, look_at_sky, Direction};
+use robotics_lib::interface::{go, Direction};
 use robotics_lib::runner::backpack::BackPack;
 use robotics_lib::runner::{Robot, Runnable};
 use robotics_lib::world::coordinates::Coordinate;
-use robotics_lib::world::tile::TileType::*;
 use robotics_lib::world::World;
 
 pub(crate) struct MyRobot {
@@ -15,8 +14,7 @@ pub(crate) struct MyRobot {
     pub audio: OxAgAudioTool,
     pub weather_prediction: WeatherPredictionTool,
 }
-use crate::components::{ENVIRONMENT, FUTUREENVIRONMENT};
-use recycle_by_ifrustrati::tool::recycle;
+use crate::components::FUTUREENVIRONMENT;
 
 impl Runnable for MyRobot {
     fn process_tick(&mut self, world: &mut World) {
