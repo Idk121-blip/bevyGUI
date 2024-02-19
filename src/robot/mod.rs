@@ -246,17 +246,10 @@ impl Runnable for MyRobot {
                                 let mut bank_coords = BANK_COORDS.lock().unwrap();
                                 let mut i = 0;
                                 println!("{:?}", bank_coords.clone());
-                                for b in &*bank_coords.clone() {
-                                    println!("{:?}", b);
-                                    println!("{}", i);
-                                    if b.0 == self.get_coordinate().get_row() {
-                                        if b.1 == self.get_coordinate().get_col() + 1 {
-                                            bank_coords.remove(i);
-                                            i -= 1;
-                                        }
-                                    }
-                                    i += 1;
-                                }
+                                bank_coords.retain(|b| {
+                                    !(b.0 == self.get_coordinate().get_row() &&
+                                        !b.1 == self.get_coordinate().get_col() + 1)
+                                });
                                 direction.remove(0);
                             }
                         } else {
@@ -274,17 +267,10 @@ impl Runnable for MyRobot {
                                 let mut bank_coords = BANK_COORDS.lock().unwrap();
                                 let mut i = 0;
                                 println!("{:?}", bank_coords.clone());
-                                for b in &*bank_coords.clone() {
-                                    println!("{:?}", b);
-                                    println!("{}", i);
-                                    if b.0 == self.get_coordinate().get_row() {
-                                        if b.1 == self.get_coordinate().get_col() - 1 {
-                                            bank_coords.remove(i);
-                                            i -= 1;
-                                        }
-                                    }
-                                    i += 1;
-                                }
+                                bank_coords.retain(|b| {
+                                    !(b.0 == self.get_coordinate().get_row() &&
+                                        !b.1 == self.get_coordinate().get_col() - 1)
+                                });
                                 direction.remove(0);
                             }
                         } else {
