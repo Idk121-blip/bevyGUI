@@ -70,6 +70,9 @@ impl Runnable for MyRobot {
             *first_tick = false;
             println!("First tick");
             (*direction).push(0);
+            (*direction).push(3);
+            (*direction).push(-3);
+
             for c in 0..10 {
                 (*direction).push(-2);
                 if (c - 2) % 3 == 0 {
@@ -96,7 +99,12 @@ impl Runnable for MyRobot {
         let mut coin_coords = COIN_COORDS.lock().unwrap();
 
         if (*direction).is_empty() {
-            if (*coin_coords).is_empty() {
+            let bank_cord_clone;
+            {
+                bank_cord_clone = (*BANK_COORDS.lock().unwrap()).clone();
+            }
+
+            if (*coin_coords).is_empty() || bank_cord_clone.is_empty() {
                 let mut found = false;
                 {
                     let robot_map = robot_map(world).unwrap();
@@ -124,12 +132,12 @@ impl Runnable for MyRobot {
                     one_direction_view(self, world, Direction::Left, 30);
                     one_direction_view(self, world, Direction::Down, 30);
                     let robot_map = robot_map(world).unwrap();
-                    for r in max(self.get_coordinate().get_row() as isize - 20 as isize, 0) as usize
-                        ..min(self.get_coordinate().get_row() + 20, 101)
+                    for r in max(self.get_coordinate().get_row() as isize - 15 as isize, 0) as usize
+                        ..min(self.get_coordinate().get_row() + 15, 101)
                     {
-                        for c in max(self.get_coordinate().get_col() as isize - 20 as isize, 0)
+                        for c in max(self.get_coordinate().get_col() as isize - 15 as isize, 0)
                             as usize
-                            ..min(self.get_coordinate().get_col() + 20, 101)
+                            ..min(self.get_coordinate().get_col() + 15, 101)
                         {
                             if robot_map[r][c].is_none() {
                                 discover_tiles(self, world, &vec![(r, c)]);
@@ -247,10 +255,16 @@ impl Runnable for MyRobot {
                                 let mut i = 0;
                                 println!("{:?}", bank_coords.clone());
                                 bank_coords.retain(|b| {
-                                    !(b.0 == self.get_coordinate().get_row() &&
-                                        !b.1 == self.get_coordinate().get_col() + 1)
+                                    !(b.0 == self.get_coordinate().get_row()
+                                        && b.1 == self.get_coordinate().get_col() + 1)
                                 });
-                                direction.remove(0);
+                                let d_n;
+                                {
+                                    d_n = direction.len();
+                                }
+                                if d_n > 0 {
+                                    direction.remove(0);
+                                }
                             }
                         } else {
                             destroy(self, world, Direction::Right);
@@ -261,6 +275,7 @@ impl Runnable for MyRobot {
                         let vec = where_am_i(self, world).0;
                         if let Content::Bank(x) = (&vec[1][0]).clone().unwrap().content {
                             if put(self, world, Content::Coin(0), 5, Direction::Left).is_err() {
+                                println!("ciao");
                                 direction.remove(0);
                             }
                             if x.start() == x.end() {
@@ -268,10 +283,16 @@ impl Runnable for MyRobot {
                                 let mut i = 0;
                                 println!("{:?}", bank_coords.clone());
                                 bank_coords.retain(|b| {
-                                    !(b.0 == self.get_coordinate().get_row() &&
-                                        !b.1 == self.get_coordinate().get_col() - 1)
+                                    !(b.0 == self.get_coordinate().get_row()
+                                        && b.1 == self.get_coordinate().get_col() - 1)
                                 });
-                                direction.remove(0);
+                                let d_n;
+                                {
+                                    d_n = direction.len();
+                                }
+                                if d_n > 0 {
+                                    direction.remove(0);
+                                }
                             }
                         } else {
                             destroy(self, world, Direction::Left);
@@ -286,20 +307,18 @@ impl Runnable for MyRobot {
                             }
                             if x.start() == x.end() {
                                 let mut bank_coords = BANK_COORDS.lock().unwrap();
-                                let mut i = 0;
-                                println!("{:?}", bank_coords.clone());
-                                for b in &*bank_coords.clone() {
-                                    println!("{:?}", b);
-                                    println!("{}", i);
-                                    if b.1 == self.get_coordinate().get_col() {
-                                        if b.0 == self.get_coordinate().get_row() - 1 {
-                                            bank_coords.remove(i);
-                                            i -= 1;
-                                        }
-                                    }
-                                    i += 1;
+
+                                bank_coords.retain(|b| {
+                                    !(b.0 == self.get_coordinate().get_row() - 1
+                                        && b.1 == self.get_coordinate().get_col())
+                                });
+                                let d_n;
+                                {
+                                    d_n = direction.len();
                                 }
-                                direction.remove(0);
+                                if d_n > 0 {
+                                    direction.remove(0);
+                                }
                             }
                         } else {
                             destroy(self, world, Direction::Up);
@@ -314,20 +333,17 @@ impl Runnable for MyRobot {
                             }
                             if x.start() == x.end() {
                                 let mut bank_coords = BANK_COORDS.lock().unwrap();
-                                let mut i = 0;
-                                println!("{:?}", bank_coords.clone());
-                                for b in &*bank_coords.clone() {
-                                    println!("{:?}", b);
-                                    println!("{}", i);
-                                    if b.1 == self.get_coordinate().get_col() {
-                                        if b.0 == self.get_coordinate().get_row() + 1 {
-                                            bank_coords.remove(i);
-                                            i -= 1;
-                                        }
-                                    }
-                                    i += 1;
+                                bank_coords.retain(|b| {
+                                    !(b.0 == self.get_coordinate().get_row() + 1
+                                        && b.1 == self.get_coordinate().get_col())
+                                });
+                                let d_n;
+                                {
+                                    d_n = direction.len();
                                 }
-                                direction.remove(0);
+                                if d_n > 0 {
+                                    direction.remove(0);
+                                }
                             }
                         } else {
                             destroy(self, world, Direction::Down);
@@ -358,11 +374,11 @@ impl Runnable for MyRobot {
                         direction.remove(direction_len - 1);
                     }
                     3 => {
-                        one_direction_view(self, world, Direction::Down, 10);
+                        let _ =one_direction_view(self, world, Direction::Down, 25);
                         direction.remove(direction_len - 1);
                     }
                     -3 => {
-                        one_direction_view(self, world, Direction::Left, 10);
+                        let _= one_direction_view(self, world, Direction::Left, 25);
                         direction.remove(direction_len - 1);
                     }
                     _ => {}
@@ -424,7 +440,7 @@ impl Runnable for MyRobot {
                         change_time(x.get_time_of_day(), x.get_time_of_day_string());
                         change_weather(x.get_weather_condition());
                     }
-                    robotics_lib::event::events::Event::EnergyRecharged(x) => unsafe {
+                    robotics_lib::event::events::Event::EnergyRecharged(x) => {
                         add_energy(x)
                     },
                     robotics_lib::event::events::Event::EnergyConsumed(x) => sub_energy(x),
@@ -549,7 +565,7 @@ impl Runnable for Bessie {
                         change_time(x.get_time_of_day(), x.get_time_of_day_string());
                         change_weather(x.get_weather_condition());
                     }
-                    robotics_lib::event::events::Event::EnergyRecharged(x) => unsafe {
+                    robotics_lib::event::events::Event::EnergyRecharged(x) => {
                         add_energy(x)
                     },
                     robotics_lib::event::events::Event::EnergyConsumed(x) => sub_energy(x),

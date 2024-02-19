@@ -4,6 +4,7 @@ mod components;
 
 mod alessandro_gui;
 mod robot;
+mod alberto_gui;
 
 use crate::alessandro_gui::main::run;
 use crate::components::MAP_DIMENSION;
@@ -31,32 +32,28 @@ use exclusion_zone::generator::{
 use exclusion_zone::tile_type::lava::LavaSettings;
 use robotics_lib;
 use robotics_lib::runner::{Robot, Runner};
-use robotics_lib::world::coordinates::Coordinate;
 use robotics_lib::world::environmental_conditions::EnvironmentalConditions;
 use robotics_lib::world::environmental_conditions::WeatherType::*;
 use robotics_lib::world::environmental_conditions::WeatherType::{Rainy, Sunny};
-use robotics_lib::world::tile::Content::{
-    Bank, Bin, Coin, Crate, Fire, Fish, Garbage, Market, Rock, Tree,
-};
-use robotics_lib::world::tile::TileType;
 use robotics_lib::world::tile::TileType::*;
 use std::io;
 
 use robotics_lib::world::tile::{Content, Tile};
 use robotics_lib::world::world_generator::Generator;
-use robotics_lib::world::World;
 use std::collections::HashMap;
-pub(crate) struct testBessie {
+use oxagaudiotool::sound_config::OxAgSoundConfig;
+
+pub(crate) struct TestBessie {
     size: usize,
 }
 
-impl testBessie {
+impl TestBessie {
     pub(crate) fn init(size: usize) -> Self {
-        testBessie { size }
+        TestBessie { size }
     }
 }
 
-impl Generator for testBessie {
+impl Generator for TestBessie {
     fn gen(
         &mut self,
     ) -> (
@@ -66,14 +63,14 @@ impl Generator for testBessie {
         f32,
         Option<HashMap<Content, f32>>,
     ) {
-        let mut rng = rand::thread_rng();
+        rand::thread_rng();
         let mut map: Vec<Vec<Tile>> = Vec::new();
         // Initialize the map with default tiles
         for _ in 0..self.size {
             let mut row: Vec<Tile> = Vec::new();
             for _ in 0..self.size {
                 row.push(Tile {
-                    tile_type: TileType::Grass,
+                    tile_type: Grass,
                     content: Content::Rock(10),
                     elevation: 0,
                 });
@@ -86,13 +83,13 @@ impl Generator for testBessie {
             map.push(row);
         }
         map[3][3] = Tile {
-            tile_type: TileType::Wall,
+            tile_type: Wall,
             content: Content::Fire,
             elevation: 0,
         };
 
         map[3][2] = Tile {
-            tile_type: TileType::Teleport(false),
+            tile_type: Teleport(false),
             content: Content::None,
             elevation: 0,
         };
@@ -110,7 +107,7 @@ impl Generator for testBessie {
     }
 }
 fn main() {
-    let my_banana;
+    let mut my_banana;
     let robot;
 
     let world_size = 101;
@@ -131,7 +128,7 @@ fn main() {
         FishSettings::default(world_size),
         RockSettings::default(world_size),
     );
-    let mut bessie_world = testBessie::init(4);
+    let mut bessie_world = TestBessie::init(4);
     println!(
         "Do you want to test the tool or test the AI:
     -1: tool
@@ -184,18 +181,21 @@ fn main() {
         route_planner: rastanidoumen_route_planner::tool::RoutePlanner::default(),
         graphics: graphics.clone(),
     };
-    let bessie = Bessie {
+    let mut bessie = Bessie {
         robot: Robot::new(),
         audio: robot_audio(&graphics),
         weather_prediction: ohcrab_weather::weather_tool::WeatherPredictionTool::new(),
         route_planner: rastanidoumen_route_planner::tool::RoutePlanner::default(),
         graphics: graphics.clone(),
     };
+    let background_music = OxAgSoundConfig::new_looped_with_volume("assets/default/music.ogg", 2.0);
     match mode1 {
         Module::Tool => {
+            let _ = bessie.audio.play_audio(&background_music);
             robot = Runner::new(Box::new(bessie), &mut bessie_world);
         }
         Module::Ai => {
+            let _ = my_banana.audio.play_audio(&background_music);
             robot = Runner::new(Box::new(my_banana), &mut world_generator);
         }
     }
@@ -206,6 +206,7 @@ fn main() {
                 alessio_graphics(world_size, runner);
             }
             Graphics::Alessandro => {
+                let _ = robot;
                 alessandro_gui(runner);
             }
         },

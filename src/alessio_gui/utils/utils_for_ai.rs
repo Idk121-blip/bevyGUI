@@ -15,7 +15,6 @@ use robotics_lib::interface::{get_score, look_at_sky, robot_map, where_am_i};
 use robotics_lib::runner::{Runnable, Runner};
 use robotics_lib::world::environmental_conditions::WeatherType;
 use robotics_lib::world::tile::Content;
-use robotics_lib::world::tile::TileType;
 use robotics_lib::world::tile::TileType::*;
 use robotics_lib::world::World;
 use std::collections::HashMap;
@@ -72,18 +71,18 @@ pub fn ui_variable_update(robot: &mut impl Runnable, world: &mut World) {
 }
 
 pub fn robot_audio(graphic: &Graphics) -> OxAgAudioTool {
-    match graphic {
+    return match graphic {
         Graphics::Alessio => {
-            return alessio_sound();
+            alessio_sound()
         }
         Graphics::Alessandro => {
-            return alessandro_sound();
+            alessandro_sound()
         }
     }
 }
 fn alessandro_sound() -> OxAgAudioTool {
-    let background_music = OxAgSoundConfig::new_looped_with_volume("assets/default/music.ogg", 2.0);
-    let background_music = OxAgSoundConfig::new_looped_with_volume("assets/default/music.ogg", 2.0);
+    OxAgSoundConfig::new_looped_with_volume("assets/default/music.ogg", 2.0);
+    OxAgSoundConfig::new_looped_with_volume("assets/default/music.ogg", 2.0);
 
     let mut events = HashMap::new();
     events.insert(
@@ -134,7 +133,7 @@ fn alessandro_sound() -> OxAgAudioTool {
         OxAgSoundConfig::new("assets/default/tile/tile_snow.ogg"),
     );
     tiles.insert(
-        TileType::Lava,
+        Lava,
         OxAgSoundConfig::new("assets/default/tile/tile_lava.ogg"),
     );
     tiles.insert(
@@ -142,7 +141,7 @@ fn alessandro_sound() -> OxAgAudioTool {
         OxAgSoundConfig::new("assets/default/tile/tile_teleport.ogg"),
     );
     tiles.insert(
-        TileType::Street,
+        Street,
         OxAgSoundConfig::new("assets/default/tile/tile_street.ogg"),
     );
 
@@ -186,11 +185,11 @@ fn alessio_sound() -> OxAgAudioTool {
 
     let mut tiles = HashMap::new();
     tiles.insert(
-        TileType::ShallowWater,
+        ShallowWater,
         OxAgSoundConfig::new("assets/sounds/water_steps.wav"),
     );
     tiles.insert(
-        TileType::Grass,
+        Grass,
         OxAgSoundConfig::new("assets/sounds/grass_steps.wav"),
     );
 

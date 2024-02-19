@@ -1,4 +1,4 @@
-use crate::alessandro_gui::generator::{MapContent, MapTile};
+use crate::alessandro_gui::generator::{MapContent};
 use crate::alessandro_gui::main::{
     EXACT_TIME, FUTURE_WEATHER, GLOBAL_3D_CONTENT, GLOBAL_3D_TILES, GLOBAL_CONTEXT, GLOBAL_SCORE,
     PAST_WORLD, ROBOT_POS, TIME, WEATHER,
@@ -975,7 +975,6 @@ pub fn update_content(tile: Tile, (x, y): (usize, usize)) {
                     );
                 }
             }
-            unsafe {
                 // check if content change
                 if let Some(t) = equal_content.get_mut(
                     &PAST_WORLD[x][y]
@@ -1010,7 +1009,6 @@ pub fn update_content(tile: Tile, (x, y): (usize, usize)) {
                         y as f32 * (tile_size.z),
                     )));
                 }
-            }
             // push the new content (it could be the same of before)
             if let Some(map_content) = GLOBAL_3D_CONTENT
                 .as_mut()
@@ -1027,20 +1025,18 @@ pub fn update_content(tile: Tile, (x, y): (usize, usize)) {
                 )));
             }
             // update only if something change to avoid useless resource usage and lag
-            unsafe {
-                for c in Content::iter() {
-                    if *equal_content.get(&c.to_default()).unwrap() {
-                        continue;
-                    } else {
-                        if let Some(context) = GLOBAL_CONTEXT.as_ref() {
-                            if let Some(mc) =
-                                GLOBAL_3D_CONTENT.as_mut().unwrap().get_mut(&c.to_default())
-                            {
-                                mc.update_istances(context);
-                            }
-                        } else {
-                            println!("Option is None");
+            for c in Content::iter() {
+                if *equal_content.get(&c.to_default()).unwrap() {
+                    continue;
+                } else {
+                    if let Some(context) = GLOBAL_CONTEXT.as_ref() {
+                        if let Some(mc) =
+                            GLOBAL_3D_CONTENT.as_mut().unwrap().get_mut(&c.to_default())
+                        {
+                            mc.update_istances(context);
                         }
+                    } else {
+                        println!("Option is None");
                     }
                 }
             }

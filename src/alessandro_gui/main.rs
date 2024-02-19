@@ -1,7 +1,6 @@
 use egui_extras::install_image_loaders;
-use robotics_lib::runner::{Robot, Runner};
+use robotics_lib::runner::{Runner};
 use robotics_lib::world::environmental_conditions::{DayTime, WeatherType};
-use robotics_lib::world::tile::TileType::*;
 use robotics_lib::world::tile::{Content, Tile};
 use std::collections::HashMap;
 use std::thread;
@@ -11,15 +10,6 @@ use crate::alessandro_gui::generator::{
     create_3d_content, create_3d_tile, create_robot_model, MapContent, MapTile,
 };
 use three_d::*;
-
-use exclusion_zone::generator::Spawnables::*;
-use exclusion_zone::generator::{NoiseSettings, Spawnables, Thresholds, WorldGenerator};
-use exclusion_zone::tile_type::lava::LavaSettings;
-use ohcrab_weather::weather_tool::WeatherPredictionTool;
-use oxagaudiotool::sound_config::OxAgSoundConfig;
-use oxagaudiotool::OxAgAudioTool;
-use robotics_lib::event::events::Event as RobotEvent;
-use robotics_lib::world::tile::TileType;
 
 // to change if name of robot change
 use crate::alessandro_gui::robot_utils::set_robot_start_pos;

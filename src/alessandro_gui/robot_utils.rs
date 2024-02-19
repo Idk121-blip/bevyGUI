@@ -1,4 +1,3 @@
-use crate::alessandro_gui::generator::create_robot_model;
 use crate::alessandro_gui::main::{ENERGY, INVENTORY, ROBOT_MODEL, ROBOT_POS};
 use robotics_lib::world::tile::TileType::{Hill, Mountain};
 use robotics_lib::world::tile::{Content, TileType};
