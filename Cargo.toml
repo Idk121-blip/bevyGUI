@@ -25,6 +25,7 @@ bevy_utils = "0.12.1"
 exclusion_zone_world_generator = { version = "0.1.5", registry = "kellnr" }
 recycle_by_ifrustrati = { version = "0.1.2", registry = "kellnr" }
 rastanidoumen_route_planner = { version= "0.1.0", registry = "kellnr" }
+bessie = { version = "0.1.11", registry = "kellnr"}
 
 # for ALESSANDRO GUI
 #three-d = { version = "0.16.3", features = [ "egui-gui"] }
@@ -32,3 +33,4 @@ three-d = { git = "https://github.com/asny/three-d.git", branch = "master", feat
 three-d-asset = {version = "0.6",features = ["obj","gltf","png", "jpeg", "http", "data-url"] }
 #egui = "0.25.0"
 egui_extras = {version = "0.25.0", features = ["all_loaders"]}
+fixedbitset = "0.4.2"

@@ -372,6 +372,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
+name = "bessie"
+version = "0.1.11"
+source = "sparse+https://advancedprogramming.disi.unitn.it/api/v1/crates/"
+checksum = "ed63826c58b67ee7120297df48c7784e50ab04a8c1c3d13232305626c561ec29"
+dependencies = [
+ "rand 0.8.5",
+ "robotics_lib",
+ "strum",
+]
+
+[[package]]
 name = "bevy"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1998,11 +2009,13 @@ dependencies = [
 name = "first_bevy_game"
 version = "0.1.0"
 dependencies = [
+ "bessie",
  "bevy",
  "bevy-progressbar",
  "bevy_utils",
  "egui_extras",
  "exclusion_zone_world_generator",
+ "fixedbitset",
  "lazy_static",
  "ohcrab_weather",
  "oxagaudiotool",

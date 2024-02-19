@@ -494,7 +494,7 @@ pub fn remove_up_content(
 
 pub fn update_content(tile: Tile, (x, y): (usize, usize)) {
     let tile_size = vec3(12.0, 0.0, 12.0);
-    let mut equal_content = HashMap::new();
+    let mut equal_content: HashMap<Content, bool> = HashMap::new();
     // initialize the equal hashmap used to be sure if need to update
     for c in Content::iter() {
         equal_content.insert(c.to_default(), true);
@@ -710,13 +710,11 @@ pub fn update_content(tile: Tile, (x, y): (usize, usize)) {
                 // update only if something change to avoid useless resource usage and lag
                 for c in Content::iter() {
                     if equal_content[&c.to_default()] {
-                        return;
+                        continue;
                     } else {
                         if let Some(context) = GLOBAL_CONTEXT.as_ref() {
-                            if let Some(mc) = GLOBAL_3D_CONTENT
-                                .as_mut()
-                                .unwrap()
-                                .get_mut(&tile.content.clone().to_default())
+                            if let Some(mc) =
+                                GLOBAL_3D_CONTENT.as_mut().unwrap().get_mut(&c.to_default())
                             {
                                 mc.update_istances(context);
                             }
@@ -935,13 +933,11 @@ pub fn update_content(tile: Tile, (x, y): (usize, usize)) {
                 // update only if something change to avoid useless resource usage and lag
                 for c in Content::iter() {
                     if equal_content[&c.to_default()] {
-                        return;
+                        continue;
                     } else {
                         if let Some(context) = GLOBAL_CONTEXT.as_ref() {
-                            if let Some(mc) = GLOBAL_3D_CONTENT
-                                .as_mut()
-                                .unwrap()
-                                .get_mut(&tile.content.clone().to_default())
+                            if let Some(mc) =
+                                GLOBAL_3D_CONTENT.as_mut().unwrap().get_mut(&c.to_default())
                             {
                                 mc.update_istances(context);
                             }
@@ -1033,14 +1029,12 @@ pub fn update_content(tile: Tile, (x, y): (usize, usize)) {
             // update only if something change to avoid useless resource usage and lag
             unsafe {
                 for c in Content::iter() {
-                    if equal_content[&c.to_default()] {
-                        return;
+                    if *equal_content.get(&c.to_default()).unwrap() {
+                        continue;
                     } else {
                         if let Some(context) = GLOBAL_CONTEXT.as_ref() {
-                            if let Some(mc) = GLOBAL_3D_CONTENT
-                                .as_mut()
-                                .unwrap()
-                                .get_mut(&tile.content.clone().to_default())
+                            if let Some(mc) =
+                                GLOBAL_3D_CONTENT.as_mut().unwrap().get_mut(&c.to_default())
                             {
                                 mc.update_istances(context);
                             }

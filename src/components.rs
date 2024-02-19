@@ -35,7 +35,7 @@ pub(crate) static MAP_DIMENSION: Mutex<usize> = Mutex::new(0);
 pub(crate) static ROBOT_COL: Mutex<usize> = Mutex::new(0);
 pub(crate) static ROBOT_ROW: Mutex<usize> = Mutex::new(0);
 
-pub(crate) const PROCESS_TICK_TIME: f32 = 1.;
+pub(crate) const PROCESS_TICK_TIME: f32 = 0.5;
 
 pub(crate) const WEATHER_ASSET_FILE: &str = "weather.png";
 pub(crate) const CLOCK_ASSET_FILE: &str = "clock.png";
