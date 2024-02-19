@@ -10,7 +10,7 @@ use robotics_lib::world::tile::TileType::{
 };
 use robotics_lib::world::tile::{Content, Tile};
 
-pub(in crate::gui) fn content_positioner(
+pub(in crate::alessio_gui::gui) fn content_positioner(
     tile: &Option<Tile>,
     mut texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
     asset_server: &Res<AssetServer>,
@@ -43,7 +43,7 @@ pub(in crate::gui) fn content_positioner(
     map_entity_content_id
 }
 
-pub(in crate::gui) fn map_tile_positioner(
+pub(in crate::alessio_gui::gui) fn map_tile_positioner(
     tile: &Option<Tile>,
     mut texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
     asset_server: &Res<AssetServer>,

@@ -467,7 +467,6 @@ pub(crate) fn build_hud(
                         .with_children(|parent| {
                             let energy_lvl =
                                 runner.runner.get_robot().get_energy().get_energy_level() as u32;
-                            println!("{}", energy_lvl);
                             let mut bar = ProgressBar::new(vec![(1, Color::RED)]);
                             bar.set_progress(1.);
 
@@ -498,9 +497,6 @@ pub(crate) fn build_hud(
                             ..default()
                         })
                         .with_children(|parent| {
-                            let energy_lvl =
-                                runner.runner.get_robot().get_energy().get_energy_level() as u32;
-                            println!("{}", energy_lvl);
                             let mut bar = ProgressBar::new(vec![(1, Color::GRAY)]);
                             bar.set_progress(1.);
 

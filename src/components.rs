@@ -6,7 +6,7 @@ use robotics_lib::world::tile::Tile;
 use std::sync::Mutex;
 
 lazy_static! {
-/// List of coordinates that the robot has seen so far
+/// List of coordinates that the banana has seen so far
     pub(crate) static ref PLOT: Mutex<Vec<Vec<Option<Tile>>>> = Mutex::new(vec![]);
 }
 
@@ -18,7 +18,7 @@ lazy_static! {
     pub(crate) static ref FUTUREENVIRONMENT: Mutex<Option<WeatherType>> = Mutex::new(None);
 }
 lazy_static! {
-/// List of coordinates that the robot has seen so far
+/// List of coordinates that the banana has seen so far
     pub(crate) static ref PLOTUPDATE: Mutex<Vec<Vec<Option<Tile>>>> = Mutex::new(vec![]);
 }
 lazy_static! {

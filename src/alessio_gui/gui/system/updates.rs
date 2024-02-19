@@ -1,4 +1,4 @@
-pub(in crate::gui) use crate::components::TickUpdate;
+pub(in crate::alessio_gui::gui) use crate::components::TickUpdate;
 use crate::components::{
     ContentToDespawn, MapEvent, MapToDespawn, RobotResource, RobotUI, EVENT, MAP_DIMENSION, PLOT,
     PLOTUPDATE, ROBOT_COL, ROBOT_ROW,

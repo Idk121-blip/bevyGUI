@@ -3,6 +3,8 @@ use crate::components::{
 };
 use crate::gui::system::startup::{App, DefaultPlugins, ImagePlugin, Window, WindowPlugin};
 use crate::gui::GuiPlugin;
+use bevy::input::mouse::MouseScrollUnit;
+use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy_utils::default;
 use oxagaudiotool::sound_config::OxAgSoundConfig;
@@ -13,7 +15,6 @@ use robotics_lib::world::environmental_conditions::WeatherType;
 use robotics_lib::world::tile::TileType;
 use robotics_lib::world::World;
 use std::collections::HashMap;
-
 pub fn ui_variable_update(robot: &mut impl Runnable, world: &mut World) {
     let (_robot_view, robot_position) = where_am_i(robot, world);
     {
@@ -132,5 +133,28 @@ pub fn ui_runner(runner: Runner) {
         )
         .insert_non_send_resource(RobotResource { runner })
         .add_plugins(GuiPlugin)
+        .add_systems(Update, zoom_handler)
         .run();
+}
+
+fn zoom_handler(
+    mut query: Query<&mut OrthographicProjection, With<Camera>>,
+    mut scroll_evr: EventReader<MouseWheel>,
+) {
+    for ev in scroll_evr.iter() {
+        match ev.unit {
+            MouseScrollUnit::Line => {
+                for mut projection in query.iter_mut() {
+                    let mut log_scale = projection.scale.ln();
+                    log_scale -= ev.y * 0.05;
+                    projection.scale = log_scale.exp();
+                }
+            }
+            _ => {
+                println!("No zoom available");
+            }
+        }
+    }
+
+    // println!("{:?}", scroll_evr.iter().next());
 }
