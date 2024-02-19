@@ -8,10 +8,11 @@ opt-level = 1
 
 [profile.dev.package."*"]
 opt-level = 3
+debug = false
 
 
 [dependencies]
-bevy = {version = "0.12.1", features = ["dynamic_linking"]}
+bevy = {version = "0.12.1"}
 rand = "0.8.5"
 strum = "0.25.0"
 strum_macros = { version = "0.25.3", features = [] }
@@ -22,6 +23,12 @@ lazy_static = "1.4.0"
 bevy-progressbar = "0.6.1"
 bevy_utils = "0.12.1"
 exclusion_zone_world_generator = { version = "0.1.5", registry = "kellnr" }
-oxagworldgenerator = { version = "0.1.4", registry = "kellnr" }
 recycle_by_ifrustrati = { version = "0.1.2", registry = "kellnr" }
 rastanidoumen_route_planner = { version= "0.1.0", registry = "kellnr" }
+
+# for ALESSANDRO GUI
+#three-d = { version = "0.16.3", features = [ "egui-gui"] }
+three-d = { git = "https://github.com/asny/three-d.git", branch = "master", features = [ "egui-gui" ] }
+three-d-asset = {version = "0.6",features = ["obj","gltf","png", "jpeg", "http", "data-url"] }
+#egui = "0.25.0"
+egui_extras = {version = "0.25.0", features = ["all_loaders"]}

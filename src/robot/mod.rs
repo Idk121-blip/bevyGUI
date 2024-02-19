@@ -1,3 +1,9 @@
+use crate::alessandro_gui::map_update::{
+    change_time, change_weather, future_weather, score_update, update_content,
+};
+use crate::alessandro_gui::robot_utils::{
+    add_energy, add_to_backpack, move_robot, set_initial_config, sub_energy, sub_to_backpack,
+};
 use crate::utils::utils_for_ai::ui_variable_update;
 use lazy_static::lazy_static;
 use ohcrab_weather::weather_tool::WeatherPredictionTool;
@@ -5,7 +11,7 @@ use oxagaudiotool::OxAgAudioTool;
 use robotics_lib::energy::Energy;
 use robotics_lib::event::events::Event;
 use robotics_lib::interface::{
-    destroy, go, look_at_sky, one_direction_view, robot_map, where_am_i, Direction,
+    destroy, get_score, go, look_at_sky, one_direction_view, robot_map, where_am_i, Direction,
 };
 use robotics_lib::runner::backpack::BackPack;
 use robotics_lib::runner::{Robot, Runnable};
@@ -13,36 +19,58 @@ use robotics_lib::world::coordinates::Coordinate;
 use robotics_lib::world::tile::{Content, Tile};
 use robotics_lib::world::World;
 use std::sync::Mutex;
+#[derive(Clone)]
+pub enum Graphics {
+    Alessio,
+    Alessandro,
+}
 
 pub(crate) struct MyRobot {
     pub robot: Robot,
     pub audio: OxAgAudioTool,
     pub weather_prediction: WeatherPredictionTool,
     pub route_planner: RoutePlanner,
+    pub graphics: Graphics,
 }
+use crate::alessandro_gui::map_update::robot_around_tile;
 use crate::components::FUTUREENVIRONMENT;
 use rastanidoumen_route_planner::tool::{RoutePlanner, RoutePlannerError};
+
 static DIRECTION: Mutex<Vec<isize>> = Mutex::new(vec![]);
 
 static FIRST_TICK: Mutex<bool> = Mutex::new(true);
 static COIN_COORDS: Mutex<Vec<(usize, usize)>> = Mutex::new(vec![]);
+static BANK_COORDS: Mutex<Vec<(usize, usize)>> = Mutex::new(vec![]);
+
 impl Runnable for MyRobot {
     fn process_tick(&mut self, world: &mut World) {
         let mut direction = DIRECTION.lock().unwrap();
         where_am_i(self, world);
-        //print!("{:?}", self.get_coordinate().get_col());
         let mut first_tick = FIRST_TICK.lock().unwrap();
 
         if *first_tick {
             *first_tick = false;
+            println!("First tick");
+            (*direction).push(0);
             for _ in 0..10 {
                 (*direction).push(-1);
                 (*direction).push(-2);
             }
-            ui_variable_update(self, world);
+
+            match self.graphics {
+                Graphics::Alessio => {
+                    ui_variable_update(self, world);
+                }
+                Graphics::Alessandro => {
+                    robot_around_tile(robot_map(world).unwrap_or(vec![vec![None]]));
+                    score_update(get_score(&world));
+                }
+            }
+            println!("{:?}", *direction);
             return;
         }
         let mut coin_coords = COIN_COORDS.lock().unwrap();
+
         if (*direction).is_empty() {
             if (*coin_coords).is_empty() {
                 let robot_map = robot_map(world).unwrap();
@@ -53,8 +81,11 @@ impl Runnable for MyRobot {
                             let tile = tile.as_ref().unwrap();
                             if let Content::Coin(_) = tile.content {
                                 (*coin_coords).push((r, c));
-
                                 found = true;
+                            }
+                            if let Content::Bank(_) = tile.content {
+                                let mut bank_coords = BANK_COORDS.lock().unwrap();
+                                (*bank_coords).push((r, c));
                             }
                         }
                     }
@@ -62,18 +93,32 @@ impl Runnable for MyRobot {
                 if !found {
                     one_direction_view(self, world, Direction::Left, 10);
                     one_direction_view(self, world, Direction::Down, 10);
-                    one_direction_view(self, world, Direction::Up, 5);
-                    one_direction_view(self, world, Direction::Right, 5);
+                    one_direction_view(self, world, Direction::Up, 10);
+                    one_direction_view(self, world, Direction::Right, 10);
                 }
             } else {
                 let robot_row = self.get_coordinate().get_row();
                 let robot_col = self.get_coordinate().get_col();
+                let mut go_bank = false;
+                for (content, quantity) in self.robot.backpack.get_contents() {
+                    if let Content::Coin(_) = content {
+                        if *quantity > 8 {
+                            go_bank = true;
+                        }
+                    }
+                }
                 let mut min_dist = 1000000000;
                 let mut coordiantes_to_reach = &(0, 0);
                 let mut pos = 0;
 
                 let mut i = 0;
-                let coordinate_clone = (*coin_coords).clone();
+
+                let mut coordinate_clone = (*coin_coords).clone();
+
+                if go_bank {
+                    let bank_coords = BANK_COORDS.lock().unwrap();
+                    coordinate_clone = (*bank_coords).clone();
+                }
                 for cords in &coordinate_clone {
                     let dist = cords.0.abs_diff(robot_row) + cords.1.abs_diff(robot_col);
                     if dist < min_dist {
@@ -90,10 +135,12 @@ impl Runnable for MyRobot {
                     (robot_row, robot_col),
                     *coordiantes_to_reach,
                 );
-                (*coin_coords).remove(pos);
+                if !go_bank {
+                    (*coin_coords).remove(pos);
+                }
+
                 match route {
                     Ok(x) => {
-                        println!("{:?}", x);
                         let mut prev_pos = (
                             self.get_coordinate().get_row(),
                             self.get_coordinate().get_col(),
@@ -122,10 +169,9 @@ impl Runnable for MyRobot {
                 }
             }
         } else {
+            println!("{:?}", *direction);
             let direction_len = direction.len();
             if direction_len == 1 {
-                println!("why");
-                println!("{:?}", direction);
                 match direction[0] {
                     1 => {
                         destroy(self, world, Direction::Right);
@@ -143,7 +189,9 @@ impl Runnable for MyRobot {
                         destroy(self, world, Direction::Down);
                         direction.remove(0);
                     }
-                    _ => {}
+                    _ => {
+                        direction.remove(0);
+                    }
                 }
             } else {
                 match direction[direction_len - 1] {
@@ -167,27 +215,78 @@ impl Runnable for MyRobot {
                 }
             }
         }
-
-        ui_variable_update(self, world);
+        match self.graphics {
+            Graphics::Alessio => {
+                ui_variable_update(self, world);
+            }
+            Graphics::Alessandro => {
+                robot_around_tile(robot_map(world).unwrap_or(vec![vec![None]]));
+                score_update(get_score(&world));
+            }
+        }
     }
 
     fn handle_event(&mut self, event: Event) {
-        let _ = self.audio.play_audio_based_on_event(&event);
+        const ONE_DAY_TICK: usize = 96;
         self.weather_prediction.process_event(&event);
-        let future_weather = self.weather_prediction.predict(96);
-
-        {
-            let mut env = FUTUREENVIRONMENT.lock().unwrap();
-            match future_weather {
-                Ok(weather) => {
-                    *env = Some(weather);
-                }
-                Err(_) => *env = None,
-            }
-        }
         // println!();
+        let fut_weather = self.weather_prediction.predict(ONE_DAY_TICK);
         // println!("{:?}", event);
         // println!();
+
+        match self.graphics {
+            Graphics::Alessio => {
+                let _ = self.audio.play_audio_based_on_event(&event);
+                {
+                    let mut env = FUTUREENVIRONMENT.lock().unwrap();
+                    match fut_weather {
+                        Ok(weather) => {
+                            *env = Some(weather);
+                        }
+                        Err(_) => *env = None,
+                    }
+                }
+            }
+            Graphics::Alessandro => {
+                match fut_weather {
+                    Ok(weather) => {
+                        future_weather(weather);
+                    }
+                    Err(_) => {}
+                }
+                match event {
+                    robotics_lib::event::events::Event::Ready => set_initial_config(
+                        self.get_coordinate().get_row(),
+                        self.get_coordinate().get_col(),
+                    ),
+                    robotics_lib::event::events::Event::Terminated => {}
+                    robotics_lib::event::events::Event::TimeChanged(x) => {
+                        change_time(x.get_time_of_day(), x.get_time_of_day_string());
+                        change_weather(x.get_weather_condition());
+                    }
+                    robotics_lib::event::events::Event::DayChanged(x) => {
+                        change_time(x.get_time_of_day(), x.get_time_of_day_string());
+                        change_weather(x.get_weather_condition());
+                    }
+                    robotics_lib::event::events::Event::EnergyRecharged(x) => unsafe {
+                        add_energy(x)
+                    },
+                    robotics_lib::event::events::Event::EnergyConsumed(x) => sub_energy(x),
+                    robotics_lib::event::events::Event::Moved(tile, (x, y)) => {
+                        move_robot(x, y);
+                    }
+                    robotics_lib::event::events::Event::TileContentUpdated(tile, c) => {
+                        update_content(tile, c)
+                    }
+                    robotics_lib::event::events::Event::AddedToBackpack(content, amount) => {
+                        add_to_backpack(&content, amount)
+                    }
+                    robotics_lib::event::events::Event::RemovedFromBackpack(content, amount) => {
+                        sub_to_backpack(&content, amount)
+                    }
+                }
+            }
+        }
     }
 
     fn get_energy(&self) -> &Energy {
