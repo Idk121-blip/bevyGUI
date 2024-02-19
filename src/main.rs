@@ -47,6 +47,7 @@ pub(crate) struct TestBessie {
     size: usize,
 }
 
+
 impl TestBessie {
     pub(crate) fn init(size: usize) -> Self {
         TestBessie { size }
@@ -154,7 +155,9 @@ fn main() {
     println!(
         "Select which graphic you would like to use:
     -1: Alessio's one
-    -2: Alessandro's one"
+    -2: Alessandro's one
+    -3: Alberto's onw"
+
     );
 
     let mut input_value = String::new();
@@ -170,8 +173,10 @@ fn main() {
 
     if input_value == 1 {
         graphics = Graphics::Alessio;
-    } else {
+    } else if input_value==2 {
         graphics = Graphics::Alessandro;
+    }else{
+        graphics = Graphics::Alberto;
     }
 
     my_banana = MyRobot {
@@ -208,6 +213,9 @@ fn main() {
             Graphics::Alessandro => {
                 let _ = robot;
                 alessandro_gui(runner);
+            }
+            _=>{
+                alberto_gui::my_gui();
             }
         },
         Err(x) => {

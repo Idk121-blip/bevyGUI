@@ -78,6 +78,9 @@ pub fn robot_audio(graphic: &Graphics) -> OxAgAudioTool {
         Graphics::Alessandro => {
             alessandro_sound()
         }
+        _ => {
+            alessandro_sound()
+        }
     }
 }
 fn alessandro_sound() -> OxAgAudioTool {

@@ -8,7 +8,6 @@ use crate::utils::utils_for_ai::ui_variable_update;
 use bessie::bessie::road_paving_machine;
 use bessie::bessie::State;
 use fixedbitset::IndexRange;
-use lazy_static::lazy_static;
 use ohcrab_weather::weather_tool::WeatherPredictionTool;
 use oxagaudiotool::OxAgAudioTool;
 use robotics_lib::energy::Energy;
@@ -20,14 +19,18 @@ use robotics_lib::interface::{
 use robotics_lib::runner::backpack::BackPack;
 use robotics_lib::runner::{Robot, Runnable};
 use robotics_lib::world::coordinates::Coordinate;
-use robotics_lib::world::tile::{Content, Tile};
+use robotics_lib::world::tile::{Content};
 use robotics_lib::world::World;
 use std::cmp::{max, min};
 use std::sync::Mutex;
+use crate::alessandro_gui::map_update::robot_around_tile;
+use crate::components::FUTUREENVIRONMENT;
+use rastanidoumen_route_planner::tool::{RoutePlanner};
 #[derive(Clone)]
 pub enum Graphics {
     Alessio,
     Alessandro,
+    Alberto
 }
 
 pub enum Module {
@@ -50,9 +53,7 @@ pub(crate) struct Bessie {
     pub graphics: Graphics,
 }
 
-use crate::alessandro_gui::map_update::robot_around_tile;
-use crate::components::FUTUREENVIRONMENT;
-use rastanidoumen_route_planner::tool::{RoutePlanner, RoutePlannerError};
+
 
 static DIRECTION: Mutex<Vec<isize>> = Mutex::new(vec![]);
 
@@ -92,6 +93,7 @@ impl Runnable for MyRobot {
                     robot_around_tile(robot_map(world).unwrap_or(vec![vec![None]]));
                     score_update(get_score(&world));
                 }
+                _ =>{}
             }
             println!("{:?}", *direction);
             return;
@@ -127,10 +129,10 @@ impl Runnable for MyRobot {
                     }
                 }
                 if !found {
-                    one_direction_view(self, world, Direction::Right, 30);
-                    one_direction_view(self, world, Direction::Up, 30);
-                    one_direction_view(self, world, Direction::Left, 30);
-                    one_direction_view(self, world, Direction::Down, 30);
+                    let _=one_direction_view(self, world, Direction::Right, 30);
+                    let _=one_direction_view(self, world, Direction::Up, 30);
+                    let _=one_direction_view(self, world, Direction::Left, 30);
+                    let _=one_direction_view(self, world, Direction::Down, 30);
                     let robot_map = robot_map(world).unwrap();
                     for r in max(self.get_coordinate().get_row() as isize - 15 as isize, 0) as usize
                         ..min(self.get_coordinate().get_row() + 15, 101)
@@ -140,7 +142,7 @@ impl Runnable for MyRobot {
                             ..min(self.get_coordinate().get_col() + 15, 101)
                         {
                             if robot_map[r][c].is_none() {
-                                discover_tiles(self, world, &vec![(r, c)]);
+                                let _=discover_tiles(self, world, &vec![(r, c)]);
                             }
                         }
                     }
@@ -165,10 +167,10 @@ impl Runnable for MyRobot {
                 let mut coordinate_clone = (*coin_coords).clone();
 
                 if go_bank && (*BANK_COORDS.lock().unwrap()).is_empty() {
-                    one_direction_view(self, world, Direction::Up, 30);
-                    one_direction_view(self, world, Direction::Left, 30);
-                    one_direction_view(self, world, Direction::Right, 30);
-                    one_direction_view(self, world, Direction::Down, 30);
+                    let _ =one_direction_view(self, world, Direction::Up, 30);
+                    let _ =one_direction_view(self, world, Direction::Left, 30);
+                    let _ =one_direction_view(self, world, Direction::Right, 30);
+                    let _ =one_direction_view(self, world, Direction::Down, 30);
                     let robot_map = robot_map(world).unwrap();
                     for r in max(self.get_coordinate().get_row() as isize - 20 as isize, 0) as usize
                         ..min(self.get_coordinate().get_row() + 20, 101)
@@ -178,7 +180,7 @@ impl Runnable for MyRobot {
                             ..min(self.get_coordinate().get_col() + 20, 101)
                         {
                             if robot_map[r][c].is_none() {
-                                discover_tiles(self, world, &vec![(r, c)]);
+                                let _=discover_tiles(self, world, &vec![(r, c)]);
                             }
                         }
                     }
@@ -252,8 +254,6 @@ impl Runnable for MyRobot {
                             }
                             if x.start() == x.end() {
                                 let mut bank_coords = BANK_COORDS.lock().unwrap();
-                                let mut i = 0;
-                                println!("{:?}", bank_coords.clone());
                                 bank_coords.retain(|b| {
                                     !(b.0 == self.get_coordinate().get_row()
                                         && b.1 == self.get_coordinate().get_col() + 1)
@@ -267,7 +267,7 @@ impl Runnable for MyRobot {
                                 }
                             }
                         } else {
-                            destroy(self, world, Direction::Right);
+                            let _=destroy(self, world, Direction::Right);
                             direction.remove(0);
                         }
                     }
@@ -280,7 +280,7 @@ impl Runnable for MyRobot {
                             }
                             if x.start() == x.end() {
                                 let mut bank_coords = BANK_COORDS.lock().unwrap();
-                                let mut i = 0;
+
                                 println!("{:?}", bank_coords.clone());
                                 bank_coords.retain(|b| {
                                     !(b.0 == self.get_coordinate().get_row()
@@ -295,7 +295,7 @@ impl Runnable for MyRobot {
                                 }
                             }
                         } else {
-                            destroy(self, world, Direction::Left);
+                            let _=destroy(self, world, Direction::Left);
                             direction.remove(0);
                         }
                     }
@@ -321,7 +321,7 @@ impl Runnable for MyRobot {
                                 }
                             }
                         } else {
-                            destroy(self, world, Direction::Up);
+                            let _=destroy(self, world, Direction::Up);
                             direction.remove(0);
                         }
                     }
@@ -346,7 +346,7 @@ impl Runnable for MyRobot {
                                 }
                             }
                         } else {
-                            destroy(self, world, Direction::Down);
+                            let _=destroy(self, world, Direction::Down);
                             direction.remove(0);
                         }
                     }
@@ -358,19 +358,19 @@ impl Runnable for MyRobot {
             } else {
                 match direction[direction_len - 1] {
                     1 => {
-                        go(self, world, Direction::Right);
+                        let _=go(self, world, Direction::Right);
                         direction.remove(direction_len - 1);
                     }
                     -1 => {
-                        go(self, world, Direction::Left);
+                        let _=go(self, world, Direction::Left);
                         direction.remove(direction_len - 1);
                     }
                     2 => {
-                        go(self, world, Direction::Up);
+                        let _=go(self, world, Direction::Up);
                         direction.remove(direction_len - 1);
                     }
                     -2 => {
-                        go(self, world, Direction::Down);
+                        let _=go(self, world, Direction::Down);
                         direction.remove(direction_len - 1);
                     }
                     3 => {
@@ -394,6 +394,7 @@ impl Runnable for MyRobot {
                 robot_around_tile(robot_map(world).unwrap_or(vec![vec![None]]));
                 score_update(get_score(&world));
             }
+            _ =>{}
         }
     }
 
@@ -444,7 +445,7 @@ impl Runnable for MyRobot {
                         add_energy(x)
                     },
                     robotics_lib::event::events::Event::EnergyConsumed(x) => sub_energy(x),
-                    robotics_lib::event::events::Event::Moved(tile, (x, y)) => {
+                    robotics_lib::event::events::Event::Moved(_tile, (x, y)) => {
                         move_robot(x, y);
                     }
                     robotics_lib::event::events::Event::TileContentUpdated(tile, c) => {
@@ -457,6 +458,9 @@ impl Runnable for MyRobot {
                         sub_to_backpack(&content, amount)
                     }
                 }
+            }
+            _=>{
+
             }
         }
     }
@@ -499,6 +503,9 @@ impl Runnable for Bessie {
                     robot_around_tile(robot_map(world).unwrap_or(vec![vec![None]]));
                     score_update(get_score(&world));
                 }
+                _=>{
+
+                }
             }
             *first_tick = false;
             return;
@@ -519,6 +526,9 @@ impl Runnable for Bessie {
             Graphics::Alessandro => {
                 robot_around_tile(robot_map(world).unwrap_or(vec![vec![None]]));
                 score_update(get_score(&world));
+            }
+            _=>{
+
             }
         }
     }
@@ -569,11 +579,11 @@ impl Runnable for Bessie {
                         add_energy(x)
                     },
                     robotics_lib::event::events::Event::EnergyConsumed(x) => sub_energy(x),
-                    robotics_lib::event::events::Event::Moved(tile, (x, y)) => {
+                    robotics_lib::event::events::Event::Moved(_tile, (x, y)) => {
                         move_robot(x, y);
                     }
-                    robotics_lib::event::events::Event::TileContentUpdated(tile, c) => {
-                        update_content(tile, c)
+                    robotics_lib::event::events::Event::TileContentUpdated(_tile, c) => {
+                        update_content(_tile, c)
                     }
                     robotics_lib::event::events::Event::AddedToBackpack(content, amount) => {
                         add_to_backpack(&content, amount)
@@ -583,6 +593,7 @@ impl Runnable for Bessie {
                     }
                 }
             }
+            _=>{}
         }
     }
 
